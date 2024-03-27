@@ -1,20 +1,12 @@
-
 // Example sketch which shows how to display some patterns
 // on a 64x32 LED matrix
-//
-
-// #define E_PIN 18
-// #define MATRIX_HEIGHT 64
-
 
 #include <ESP32-HUB75-MatrixPanel-I2S-DMA.h>
-
 
 #define PANEL_RES_X 64      // Number of pixels wide of each INDIVIDUAL panel module. 
 #define PANEL_RES_Y 64     // Number of pixels tall of each INDIVIDUAL panel module.
 #define PANEL_CHAIN 1      // Total number of panels chained one to another
  
-
 //MatrixPanel_I2S_DMA dma_display;
 MatrixPanel_I2S_DMA *dma_display = nullptr;
 
@@ -23,8 +15,6 @@ uint16_t myWHITE = dma_display->color565(255, 255, 255);
 uint16_t myRED = dma_display->color565(255, 0, 0);
 uint16_t myGREEN = dma_display->color565(0, 255, 0);
 uint16_t myBLUE = dma_display->color565(0, 0, 255);
-
-
 
 // Input a value 0 to 255 to get a color value.
 // The colours are a transition r - g - b - back to r.
@@ -43,12 +33,12 @@ uint16_t colorWheel(uint8_t pos) {
 
 void drawText(int colorWheelOffset)
 {
-  
+  dma_display->fillScreen(myBLACK);
   // draw text with a rotating colour
   dma_display->setTextSize(1);     // size 1 == 8 pixels high
   dma_display->setTextWrap(false); // Don't wrap at end of line - will do ourselves
 
-  dma_display->setCursor(5, 0);    // start at top left, with 8 pixel of spacing
+  dma_display->setCursor(0, 0);    // start at top left, with 8 pixel of spacing
   uint8_t w = 0;
   const char *str = "HACKERSPACE";
   for (w=0; w<strlen(str); w++) {
@@ -76,80 +66,38 @@ void drawText(int colorWheelOffset)
   dma_display->print("truj");
   dma_display->setCursor(20, 47);
   dma_display->print("zomb");
- 
 }
 
-
 void setup() {
-
+  // Serial.begin(115200);
   // Module configuration
   HUB75_I2S_CFG mxconfig(
     PANEL_RES_X,   // module width
     PANEL_RES_Y,   // module height
     PANEL_CHAIN    // Chain length
   );
-
   mxconfig.gpio.e = 18;
-  //mxconfig.clkphase = false;
-  //mxconfig.driver = HUB75_I2S_CFG::FM6126A;
+  mxconfig.clkphase = false;
+  // mxconfig.setPixelColorDepthBits(32);
+  mxconfig.double_buff = true;
 
   // Display Setup
   dma_display = new MatrixPanel_I2S_DMA(mxconfig);
   dma_display->begin();
   dma_display->setBrightness8(255); //0-255
   dma_display->clearScreen();
-  dma_display->fillScreen(myBLACK);
-  
-  // // fix the screen with green
-  // dma_display->fillRect(0, 0, dma_display->width(), dma_display->height(), dma_display->color444(0, 15, 0));
-  // delay(500);
-
-  // // draw a box in yellow
-  // dma_display->drawRect(0, 0, dma_display->width(), dma_display->height(), dma_display->color444(15, 15, 0));
-  // delay(500);
-
-  // // draw an 'X' in red
-  // dma_display->drawLine(0, 0, dma_display->width()-1, dma_display->height()-1, dma_display->color444(15, 0, 0));
-  // dma_display->drawLine(dma_display->width()-1, 0, 0, dma_display->height()-1, dma_display->color444(15, 0, 0));
-  // delay(500);
-
-  // // draw a blue circle
-  // dma_display->drawCircle(10, 10, 10, dma_display->color444(0, 0, 15));
-  // delay(500);
-
-  // // fill a violet circle
-  // dma_display->fillCircle(40, 21, 10, dma_display->color444(15, 0, 15));
-  // delay(500);
-
-  // // fill the screen with 'black'
-  // dma_display->fillScreen(dma_display->color444(0, 0, 0));
-
-  // //drawText(0);
-
+  /* power draw test */
+  // dma_display->fillScreen(myWHITE); 
+  // dma_display->flipDMABuffer();
+  // delay(5000);
 }
 
 uint8_t wheelval = 0;
 void loop() {
-
     // animate by going through the colour wheel for the first two lines
     drawText(wheelval);
     wheelval +=1;
 
-    delay(20); 
-/*
-  drawText(0);
-  delay(2000);
-  dma_display->clearScreen();
-  dma_display->fillScreen(myBLACK);
-  delay(2000);
-  dma_display->fillScreen(myBLUE);
-  delay(2000);
-  dma_display->fillScreen(myRED);
-  delay(2000);
-  dma_display->fillScreen(myGREEN);
-  delay(2000);
-  dma_display->fillScreen(myWHITE);
-  dma_display->clearScreen();
-  */
-  
+    dma_display->flipDMABuffer();
+    delay(20);  
 }
